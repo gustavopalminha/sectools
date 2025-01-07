@@ -1,0 +1,50 @@
+{
+  "name": "sectools",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=18.18.0",
+    "npm": ">=10.0"
+  },
+  "scripts": {
+    "init-config": "cp .env.sample .env",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate deploy",
+    "dev": "next dev",
+    "dev:sync": "npm run prisma:generate && npm run prisma:migrate && npm run dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prod": "npm run prisma:generate && npm run prisma:migrate && npm run build && npm run start",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.2.1",
+    "next": "14.2.23",
+    "pino": "^9.6.0",
+    "pino-pretty": "^13.0.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.17.14",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.23",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "jest-mock-extended": "^4.0.0-beta1",
+    "postcss": "^8",
+    "prisma": "^6.2.1",
+    "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5"
+  }
+}
