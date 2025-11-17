@@ -12,22 +12,19 @@ jest.mock("@/components/submit", () => {
   return MockSubmitComponent;
 });
 
-jest.mock("react-dom", () => ({
-  ...jest.requireActual("react-dom"),
-  useFormState: () => [
-    {
-      // Return a mock state object
-      data: {
-        messageId: null,
-      },
-    },
-    // Mock setState function
-    "FAKE ACTION",
-  ],
+const mockUseActionState = jest.fn();
+
+jest.mock("react", () => ({
+  ...jest.requireActual("react"),
+  useActionState: (...args: any[]) => mockUseActionState(...args),
 }));
 
 jest.mock("next/dynamic", () => {
-  return jest.fn(() => <div role="dynamic"></div>);
+  return jest.fn(() => {
+    const MockComponent = () => <div role="dynamic"></div>;
+    MockComponent.displayName = "MockDynamic";
+    return MockComponent;
+  });
 });
 
 jest.mock("@/lib/logger", () => ({
@@ -39,18 +36,31 @@ jest.mock("@/lib/logger", () => ({
 }));
 
 describe("AddMessage Component", () => {
-  it("renders the component", async () => {
-    render(
-      <AddMessage>
-        <input />
-      </AddMessage>
-    );
-
-    const formComponent = await screen.findByTestId("add-message");
-    expect(formComponent).toBeInTheDocument();
+  beforeEach(() => {
+    mockUseActionState.mockReturnValue([
+      { data: { messageId: null } },
+      "FAKE ACTION",
+    ]);
   });
 
-  it("renders the link viewer component if a message was created", async () => {
+  it("renders the component with children when no message created", async () => {
+    render(
+      <AddMessage>
+        <input data-testid="test-input" />
+      </AddMessage>
+    );
+
+    const formComponent = await screen.findByTestId("add-message");
+    expect(formComponent).toBeInTheDocument();
+    expect(screen.getByTestId("test-input")).toBeInTheDocument();
+  });
+
+  it("renders link viewer when message is created", async () => {
+    mockUseActionState.mockReturnValue([
+      { data: { messageId: "test-id-123" } },
+      "FAKE ACTION",
+    ]);
+
     render(
       <AddMessage>
         <input />
@@ -58,8 +68,22 @@ describe("AddMessage Component", () => {
     );
 
     const formComponent = await screen.findByTestId("add-message");
-
     expect(formComponent).toBeInTheDocument();
-    expect(screen.queryByRole("dynamic")).not.toBeInTheDocument();
+    expect(screen.getByRole("dynamic")).toBeInTheDocument();
+  });
+
+  it("does not render children when message is created", async () => {
+    mockUseActionState.mockReturnValue([
+      { data: { messageId: "test-id-123" } },
+      "FAKE ACTION",
+    ]);
+
+    render(
+      <AddMessage>
+        <input data-testid="test-input" />
+      </AddMessage>
+    );
+
+    expect(screen.queryByTestId("test-input")).not.toBeInTheDocument();
   });
 });

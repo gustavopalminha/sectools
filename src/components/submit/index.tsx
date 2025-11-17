@@ -2,7 +2,7 @@
 
 import { useFormStatus } from "react-dom";
 
-const Submit = () => {
+const Submit = (): React.JSX.Element => {
   const { pending } = useFormStatus();
 
   return (

@@ -4,28 +4,20 @@ App to share sensible info temporary with someone.
 
 Screens:
 
-<table>
-    <tr>
-      <td>1) Initial screen: Write a message and click the create button bellow</td>
-      <td>2) Message created: Link bellow to share with the recipient</td>
-      <td>3) Visit message: use the link to view the message</td>
-      <td>4) Message deleted: Error screen with message not found.</td>
-    </tr>
-  <tr>
-    <td>
-      <img src="/assets/initial_screen.PNG" width="450" title="Create a message and get a link bellow">
-    </td>
-    <td>
-      <img src="/assets/after_message_created.png" width="450" title="Create a message and get a link bellow">
-    </td>
-    <td>
-      <img src="/assets/message_visited.png" width="450" title="Visited created message">
-    </td>
-    <td>
-      <img src="/assets/after_message_visited_delete.png" width="450" title="After deleted message">
-    </td>
-  </tr>
-</table>
+
+1) Initial screen: Write a message and click the create button bellow.
+<img src="/assets/initial_screen.PNG" title="Create a message and get a link bellow">
+
+2) Message created: Link bellow to share with the recipient.
+<img src="/assets/after_message_created.png" title="Create a message and get a link bellow">
+
+3) Visit message: use the link to view the message.
+<img src="/assets/message_visited.png" title="Visited created message">
+
+4) Message deleted: Error screen with message not found.
+<img src="/assets/after_message_visited_delete.png" title="After deleted message">
+
+
 
 ## Table of contents 🗂
 
@@ -48,8 +40,10 @@ It can be deployed as [Docker](https://www.docker.com/) container which performs
 
 Created with:
 
-- NextJS 14
+- NextJS 16
+- React 19
 - Tailwind CSS
+- Radix UI
 - Zod
 - Crypto
 - Prisma ORM
@@ -84,10 +78,8 @@ Make sure to install [Docker](https://docs.docker.com/get-docker/) and clone the
 To use PostgreSQL spin a container with it by running:
 
 ```
-docker run -p 5432:5432 --name db -e POSTGRES_PASSWORD=postgres -d
+docker run -p 5432:5432 --name sectools-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=sectools -d postgres
 ```
-
-After running it create a local database named sectools.
 
 Then you need to apply the Prisma ORM migrations and run the development server.
 
@@ -128,7 +120,7 @@ nom run test:watch
 
 ## Run production build 🏎
 
-To locally build and run a production optimized version you can use the following commands.
+To locally build and run a production optimized version of the frontend, you can use the following commands.
 
 ```bash
 # 1) Create an optimized production build
@@ -143,6 +135,8 @@ npm run prod
 ```
 
 Note: Only running the `build` and `start` commands are not enough, you still need to sync the database with your postgresql instances if that was not done before.
+
+You will need to use a postgresql instance to be able to point the frontend by filling in the .env environment variable
 
 ## Development process 📜
 
@@ -203,14 +197,12 @@ Contributions are accepted.
 
 ## Deployment Process 🚀
 
+Current `dockerfile` is setup to run the production build and the docker compose is also prepared to provide a postgresql instance for this frontend to work.
+
+If running in production you should adjust the `dockerfile` as well as `compose.yaml` to your needs.
+
 Run docker compose:
 
 ```docker
 docker compose up
 ```
-
-This compose will setup 2 services: postgresql and a web client (with the nextjs).
-
-The `dockerfile` will run a custom script "prod" which will sync the postgresql database and build nextjs for production.
-
-In case its necessary, change the `dockerfile` and `compose.yaml` .

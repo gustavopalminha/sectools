@@ -1,7 +1,7 @@
 "use server";
 
 import { inputSchema } from "@/validators/schemas";
-import { CreateReturn } from "./message.types";
+import { CreateReturn, Message } from "./message.types";
 import { encrypt, decrypt } from "@/lib/cypher";
 import prisma from "@/lib/db";
 
@@ -36,10 +36,15 @@ const createMessage = async (
   return { status: true, data: { messageId: message.id }, errors: null };
 };
 
-const getMessage = async (id: string) => {
+const getMessage = async (id: string): Promise<Message | null> => {
+  const message = await prisma.message.findUnique({ where: { id: id } });
+  return message;
+};
+
+const tryGetMessage = async (id: string): Promise<Message | null> => {
   actionLogger.info(`GET MESSAGE WITH ID ${id}`);
 
-  const message = await prisma.message.findUnique({ where: { id: id } });
+  const message = await getMessage(id);
 
   if (!message) {
     return null;
@@ -68,31 +73,9 @@ const getMessage = async (id: string) => {
   return message;
 };
 
-const deleteMessage = async (id: string) => {
+const deleteMessage = async (id: string): Promise<Message> => {
   actionLogger.info(`DELETE MESSAGE WITH ID ${id}`);
   return await prisma.message.delete({ where: { id: id } });
 };
 
-const deleteOlderMessages = async (reference: Date) => {
-  actionLogger.info(
-    `DELETE OLDER MESSAGES WITH CREATED DATE LOWER THAN ${reference.toDateString()}`
-  );
-
-  const messages = await prisma.message.findMany({
-    where: { createdAt: { lt: reference } },
-  });
-
-  type TMessage = {
-    id: string;
-    createdAt: Date;
-    body: string;
-    minutesToExpire: number;
-    nextVisit: boolean;
-  };
-
-  const ids = messages.map((message: TMessage) => message.id);
-
-  return await prisma.message.deleteMany({ where: { id: { in: ids } } });
-};
-
-export { createMessage, getMessage, deleteMessage, deleteOlderMessages };
+export { createMessage, getMessage, tryGetMessage, deleteMessage };

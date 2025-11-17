@@ -2,42 +2,42 @@ import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import Component from "@/app/page";
 
-jest.mock("@/components/delete", () => {
-  const MockDeleteComponent = () => <div role="delete"></div>;
-  MockDeleteComponent.displayName = "MockDeleteComponent";
-  return MockDeleteComponent;
-});
-jest.mock("@/components/editor", () => {
-  const MockEditorComponent = () => <div role="editor"></div>;
-  MockEditorComponent.displayName = "MockEditorComponent";
-  return MockEditorComponent;
-});
 jest.mock("@/components/add-message", () => {
   const MockAddMessageComponent = ({
     children,
   }: {
     children: React.ReactNode;
-  }) => <div role="add">{children}</div>;
+  }) => <form>{children}</form>;
   MockAddMessageComponent.displayName = "MockAddMessageComponent";
   return MockAddMessageComponent;
 });
 
+jest.mock("@/components/message-input", () => {
+  const MockMessageInput = () => <div data-testid="message-input">Message Input</div>;
+  MockMessageInput.displayName = "MockMessageInput";
+  return MockMessageInput;
+});
+
+jest.mock("@/components/delete-options", () => {
+  const MockDeleteOptions = () => <div data-testid="delete-options">Delete Options</div>;
+  MockDeleteOptions.displayName = "MockDeleteOptions";
+  return MockDeleteOptions;
+});
+
 describe("Home Component", () => {
-  it("renders the Add Message Form component", async () => {
+  it("renders message input component", () => {
     render(<Component />);
-    const formComponent = await screen.findByRole("add");
-    expect(formComponent).toBeInTheDocument();
+    expect(screen.getByTestId("message-input")).toBeInTheDocument();
   });
 
-  it("renders the Message Editor component inside the Form", async () => {
+  it("renders delete options component", () => {
     render(<Component />);
-    const editorComponent = await screen.findByRole("editor");
-    expect(editorComponent).toBeInTheDocument();
+    expect(screen.getByTestId("delete-options")).toBeInTheDocument();
   });
 
-  it("renders the Delete Options component inside the Form", async () => {
+  it("renders create button", () => {
     render(<Component />);
-    const optionsComponent = await screen.findByRole("delete");
-    expect(optionsComponent).toBeInTheDocument();
+    const button = screen.getByRole("button", { name: /create/i });
+    expect(button).toBeInTheDocument();
   });
 });

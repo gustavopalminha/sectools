@@ -1,16 +1,9 @@
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import Page from "@/app/[messageId]/page";
-import { getMessage } from "@/actions/message";
+import { tryGetMessage } from "@/actions/message";
 
-// Mock dependencies
 jest.mock("@/actions/message");
-jest.mock("@/components/editor", () => {
-  const MockEditor = () => <div>Editor Component</div>;
-  MockEditor.displayName = "MockEditor";
-  return MockEditor;
-});
-
 jest.mock("@/app/[messageId]/not-found", () => {
   const MockNotFound = () => <div role="not-found">Not Found</div>;
   MockNotFound.displayName = "MockNotFound";
@@ -20,19 +13,18 @@ jest.mock("@/app/[messageId]/not-found", () => {
 jest.mock("@/lib/logger", () => ({
   logger: {
     child: () => ({
-      error: (message: string) => `
-        ${message}`,
+      error: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
     }),
   },
 }));
 
 describe("Page Component", () => {
-  it("renders Editor component when message is found", async () => {
-    const promise = new Promise<{ messageId: string }>((res) => {
-      res({ messageId: "message-fake-id" });
-    });
+  it("renders textarea with message when found", async () => {
+    const promise = Promise.resolve({ messageId: "message-fake-id" });
 
-    (getMessage as jest.Mock).mockResolvedValue({
+    (tryGetMessage as jest.Mock).mockResolvedValue({
       id: "message-fake-id",
       body: "Test message body",
     });
@@ -43,16 +35,14 @@ describe("Page Component", () => {
       })
     );
 
-    const editorElement = await screen.findByText("Editor Component");
-    expect(editorElement).toBeInTheDocument();
+    const textarea = await screen.findByDisplayValue("Test message body");
+    expect(textarea).toBeInTheDocument();
   });
 
   it("renders NotFound component when message is not found", async () => {
-    const promise = new Promise<{ messageId: string }>((res) => {
-      res({ messageId: "message-fake-id" });
-    });
+    const promise = Promise.resolve({ messageId: "message-fake-id" });
 
-    (getMessage as jest.Mock).mockResolvedValue(null);
+    (tryGetMessage as jest.Mock).mockResolvedValue(null);
 
     render(
       await Page({
